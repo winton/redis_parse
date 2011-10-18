@@ -212,9 +212,9 @@ void process_record(char *record, int score) {
 			continue;
 		// Skip if score not within range
 		if (score >= 0) {
-			if (queries[q].finish >= 0 && queries[q].finish > score)
+			if (queries[q].finish >= 0 && score > queries[q].finish)
 				continue;
-			if (queries[q].start >= 0 && queries[q].start < score)
+			if (queries[q].start >= 0 && score < queries[q].start)
 				continue;
 		}
 		// For each column
