@@ -100,8 +100,8 @@ int main(int argc, char *argv[]) {
 	with_scores = strstr(cmd, "WITHSCORES") ? true : false;
 
 	int x, y, start;
-	for (x = 0; x < ((argc - 4) / 6); x++) {
-		start = x * 6 + 4;
+	for (x = 0; x < ((argc - 4) / 7); x++) {
+		start = x * 7 + 4;
 
 		queries[x].used = true;
 		queries[x].display_count = false;
