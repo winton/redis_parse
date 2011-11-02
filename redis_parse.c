@@ -33,8 +33,16 @@ struct query {
 	bool display_count, display_group;
 	// Query empty?
 	bool query_empty;
+	// Exclude empty?
+	bool exclude_empty;
+	// Query empty at index?
+	bool query_empty_at[6];
+	// Exclude empty at index?
+	bool exclude_empty_at[6];
 	// Array of query strings (by column)
 	char **query;
+	// Array of exclusionary query strings (by column)
+	char **exclude;
 	// Column to group by
 	int column;
 	// Match count
@@ -99,6 +107,7 @@ int main(int argc, char *argv[]) {
 		queries[x].display_count = false;
 		queries[x].display_group = false;
 		queries[x].query_empty = true;
+		queries[x].exclude_empty = true;
 		queries[x].count = 0;
 		queries[x].displayed = 0;
 		queries[x].hash = NULL;
@@ -114,11 +123,21 @@ int main(int argc, char *argv[]) {
 		queries[x].limit = atoi(argv[start+3]);
 		queries[x].column = column_to_index(argv[start+4]);
 		queries[x].query = to_fields(argv[start+5]);
+		queries[x].exclude = to_fields(argv[start+6]);
 
 		// Query empty?
 		for (y = 0; y < columns_count; y++) {
-			if (strlen(queries[x].query[y]) > 0)
+			if (strlen(queries[x].query[y]) > 0) {
 				queries[x].query_empty = false;
+				queries[x].query_empty_at[y] = false;
+			} else
+				queries[x].query_empty_at[y] = true;
+				
+			if (strlen(queries[x].exclude[y]) > 0) {
+				queries[x].exclude_empty = false;
+				queries[x].exclude_empty_at[y] = false;
+			} else
+				queries[x].exclude_empty_at[y] = true;
 		}
 	}
 
@@ -200,6 +219,7 @@ bool limit_reached(struct query *q) {
 }
 
 void process_record(char *record, int score) {
+	bool match;
 	char *field;
 	char **fields;
 	fields = to_fields(record);
@@ -219,8 +239,22 @@ void process_record(char *record, int score) {
 		}
 		// For each column
 		for (x = 0; x < columns_count; x++) {
-			// If query empty or match on field
-			if (queries[q].query_empty || (strlen(queries[q].query[x]) != 0 && strstr(fields[x], queries[q].query[x]))) {
+			match = (
+				// exclude matches
+				(
+					queries[q].exclude_empty ||
+					queries[q].exclude_empty_at[x] ||
+					!strstr(fields[x], queries[q].exclude[x])
+				// include matches
+				) && (
+					queries[q].query_empty ||
+					(
+						!queries[q].query_empty_at[x] &&
+						strstr(fields[x], queries[q].query[x])
+					)
+				)
+			);
+			if (match) {
 				if (queries[q].display_count)
 					queries[q].count++;
 				if (queries[q].display_group && queries[q].column > -1) {
