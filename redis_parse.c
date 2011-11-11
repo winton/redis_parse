@@ -58,7 +58,7 @@ struct query {
 	// Hash for grouping
 	struct hash_struct *hash;
 };
-struct query queries[20];
+struct query queries[100];
 
 // Pass scores into #process_record?
 bool with_scores = false;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 
 	// Display results
 	int q;
-	for (q = 0; q < 20; q++) {
+	for (q = 0; q < 100; q++) {
 		if (queries[q].used != true)
 			continue;
 
@@ -226,7 +226,7 @@ void process_record(char *record, int score) {
 
 	// For each query
 	int q, x;
-	for (q = 0; q < 20; q++) {
+	for (q = 0; q < 100; q++) {
 		// Skip unused query structs
 		if (queries[q].used != true)
 			continue;
