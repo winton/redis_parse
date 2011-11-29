@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 	redisContext *c = redisConnectWithTimeout(host, port, timeout);
 	if (c->err) {
 		printf("Connection error: %s\n", c->errstr);
-		exit(1);
+		exit(0);
 	}
 
 	// Use custom Hiredis reader functions
