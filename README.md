@@ -19,9 +19,9 @@ Usage
         LIMIT           Only works if type GROUP, limit results
         COLUMN          Only works if type GROUP - referrer, time, tags, article_id, keywords, or type
         QUERY           Pipe delimited query string representing matches on the columns:
-                        referrer|time|tags|article_id|keywords|type
+                        referrer|time|tags|article_id|keywords|type|tnt
         EXCLUDE         Pipe delimited query string representing matches to exclude on the columns:
-                        referrer|time|tags|article_id|keywords|type
+                        referrer|time|tags|article_id|keywords|type|tnt
 
     Example:
-        redis_parse 127.0.0.1 6379 'ZRANGEBYSCORE hits -inf +inf' COUNT -1 -1 100 referrer 'a|b|c|d|e|f' 'a|b|c|d|e|f'
+        redis_parse 127.0.0.1 6379 'ZRANGEBYSCORE hits -inf +inf' COUNT -1 -1 100 referrer 'a|b|c|d|e|f|g' 'a|b|c|d|e|f|g'
