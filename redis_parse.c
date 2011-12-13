@@ -13,7 +13,8 @@ char columns[][20] = {
 	"tags",
 	"article_id",
 	"keywords",
-	"type"
+	"type",
+	"tnt"
 };
 unsigned int columns_count = sizeof(columns) / sizeof(columns[0]);
 
@@ -36,9 +37,9 @@ struct query {
 	// Exclude empty?
 	bool exclude_empty;
 	// Query empty at index?
-	bool query_empty_at[6];
+	bool query_empty_at[7];
 	// Exclude empty at index?
-	bool exclude_empty_at[6];
+	bool exclude_empty_at[7];
 	// Array of query strings (by column)
 	char **query;
 	// Array of exclusionary query strings (by column)
