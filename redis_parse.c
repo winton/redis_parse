@@ -240,27 +240,26 @@ void process_record(char *record, int score) {
 				continue;
 		}
 
-		// For each column
 		match = true;
-		for (x = 0; x < columns_count; x++) {
-			// Exclude matches
-			exclude = (
-				!queries[q].exclude_empty &&
-				!queries[q].exclude_empty_at[x] &&
-				strstr(fields[x], queries[q].exclude[x])
-			);
-			if (exclude) {
-				match = false;
-				break;
+		if (!queries[q].exclude_empty)
+			// For each column
+			for (x = 0; x < columns_count; x++) {
+				// Exclude matches
+				if (!queries[q].exclude_empty_at[x] && strstr(fields[x], queries[q].exclude[x])) {
+					match = false;
+					break;
+				}
 			}
-			if (queries[q].query_empty)
-				break;
-			// Include matches
-			if (!queries[q].query_empty_at[x] && !strstr(fields[x], queries[q].query[x])) {
-				match = false;
-				break;
+
+		if (match && !queries[q].query_empty)
+			// For each column
+			for (x = 0; x < columns_count; x++) {
+				// Include matches
+				if (!queries[q].query_empty_at[x] && !strstr(fields[x], queries[q].query[x])) {
+					match = false;
+					break;
+				}
 			}
-		}
 
 		if (match) {
 			if (queries[q].display_count)
@@ -274,7 +273,6 @@ void process_record(char *record, int score) {
 				} else
 					hash_add_or_update(q, field);
 			}
-			break;
 		}
 	}
 
