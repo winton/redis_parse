@@ -220,7 +220,7 @@ bool limit_reached(struct query *q) {
 }
 
 void process_record(char *record, int score) {
-	bool exclude, match;
+	bool match;
 	char *field;
 	char **fields;
 	fields = to_fields(record);
@@ -231,7 +231,6 @@ void process_record(char *record, int score) {
 		// Skip unused query structs
 		if (queries[q].used != true)
 			continue;
-		
 		// Skip if score not within range
 		if (score >= 0) {
 			if (queries[q].finish >= 0 && score > queries[q].finish)
@@ -239,43 +238,38 @@ void process_record(char *record, int score) {
 			if (queries[q].start >= 0 && score < queries[q].start)
 				continue;
 		}
-
 		// For each column
-		match = true;
 		for (x = 0; x < columns_count; x++) {
-			// Exclude matches
-			exclude = (
-				!queries[q].exclude_empty &&
-				!queries[q].exclude_empty_at[x] &&
-				strstr(fields[x], queries[q].exclude[x])
+			match = (
+				// exclude matches
+				(
+					queries[q].exclude_empty ||
+					queries[q].exclude_empty_at[x] ||
+					!strstr(fields[x], queries[q].exclude[x])
+				// include matches
+				) && (
+					queries[q].query_empty ||
+					(
+						!queries[q].query_empty_at[x] &&
+						strstr(fields[x], queries[q].query[x])
+					)
+				)
 			);
-			if (exclude) {
-				match = false;
+			if (match) {
+				if (queries[q].display_count)
+					queries[q].count++;
+				if (queries[q].display_group && queries[q].column > -1) {
+					field = malloc(strlen(fields[queries[q].column]) + 1);
+					strcpy(field, fields[queries[q].column]);
+					if (queries[q].column == 2) { // tag
+						hash_add_or_update(q, xstrtok(field, ","));
+						while (hash_add_or_update(q, xstrtok(NULL, ",")));
+					} else
+						hash_add_or_update(q, field);
+				}
 				break;
 			}
-			if (queries[q].query_empty)
-				break;
-			// Include matches
-			if (!queries[q].query_empty_at[x] && !strstr(fields[x], queries[q].query[x])) {
-				match = false;
-				break;
-			}
-		}
-
-		if (match) {
-			if (queries[q].display_count)
-				queries[q].count++;
-			if (queries[q].display_group && queries[q].column > -1) {
-				field = malloc(strlen(fields[queries[q].column]) + 1);
-				strcpy(field, fields[queries[q].column]);
-				if (queries[q].column == 2) { // tag
-					hash_add_or_update(q, xstrtok(field, ","));
-					while (hash_add_or_update(q, xstrtok(NULL, ",")));
-				} else
-					hash_add_or_update(q, field);
-			}
-			break;
-		}
+		}	
 	}
 
 	free(fields);
